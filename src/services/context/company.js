@@ -23,10 +23,10 @@ export const CompanyProvider = ({ children }) => {
       
       const userString = localStorage.getItem('user');
       
-      if (!userString) {
+     /*  if (!userString) {
         throw new Error('User data not found in localStorage');
       }
-      
+       */
       let user;
       try {
         user = JSON.parse(userString);
