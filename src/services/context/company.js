@@ -55,7 +55,6 @@ export const CompanyProvider = ({ children }) => {
     error,
     fetchCompany,
   };
-
   return (
     <CompanyContext.Provider value={value}>
       {children}
