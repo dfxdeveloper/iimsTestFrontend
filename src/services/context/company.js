@@ -34,9 +34,6 @@ export const CompanyProvider = ({ children }) => {
         throw new Error('Invalid user data in localStorage');
       }
       const companyId = user?.companyId;
-      if (!companyId) {
-        throw new Error('Company ID not found in user data');
-      }
       const response = await api.get(`/companies/${companyId}`);
       setCompany(response.data);
     } catch (error) {
