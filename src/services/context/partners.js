@@ -1,24 +1,32 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { api } from '../config/axiosInstance';
 
-
 const PartnersContext = createContext();
 
 export const usePartners = () => {
   const context = useContext(PartnersContext);
-  if (!context) {
-    throw new Error('usePartners must be used within a PartnersProvider');
-  }
   return context;
 };
 
 export const PartnersProvider = ({ children }) => {
   const [partners, setPartners] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const fetchPartners = async () => {
     try {
       setIsLoading(true);
+      setError(null);
+      const userString = localStorage.getItem('user');
+      if (!userString) {
+        throw new Error('User not authenticated');
+      }
+
+      const user = JSON.parse(userString);
+      if (!user?.token) {
+        throw new Error('Authentication token not found');
+      }
+
       const response = await api.get("/partners");
       const formattedPartners = response.data.map((partner, index) => ({
         srNo: (index + 1).toString().padStart(2, "0"),
@@ -33,6 +41,7 @@ export const PartnersProvider = ({ children }) => {
       setPartners(formattedPartners);
     } catch (error) {
       console.error("Error fetching partners:", error);
+      setError(error.message || 'Failed to fetch partners data');
     } finally {
       setIsLoading(false);
     }
@@ -46,6 +55,7 @@ export const PartnersProvider = ({ children }) => {
     partners,
     setPartners,
     isLoading,
+    error,
     fetchPartners,
   };
 

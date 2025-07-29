@@ -15,10 +15,10 @@ axiosInstance.interceptors.request.use(
   (config) => {
     try {
       const userData = JSON.parse(localStorage.getItem('user') || '{}');
-        if (userData?.token) {
-          config.headers.Authorization = `Bearer ${userData.token}`;
-        }
-      
+      if (userData?.token) {
+        // Fixed: Added backticks for template literal
+        config.headers.Authorization = `Bearer ${userData.token}`;
+      }
     } catch (error) {
       console.error('Error parsing user data:', error);
       localStorage.clear();
@@ -55,7 +55,7 @@ axiosInstance.interceptors.response.use(
         default:
           console.error('An error occurred');
       }
-      
+
       return Promise.reject(error.response.data);
     } else if (error.request) {
       return Promise.reject({

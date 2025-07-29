@@ -1,18 +1,15 @@
-import  { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { api } from '../config/axiosInstance';
 
 const CompanyContext = createContext();
 
 export const useCompany = () => {
   const context = useContext(CompanyContext);
-  if (!context) {
-    throw new Error('useCompany must be used within a CompanyProvider');
-  }
   return context;
 };
 
 export const CompanyProvider = ({ children }) => {
-  const [company, setCompany] = useState(null);
+  const [company, setCompany] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -20,25 +17,30 @@ export const CompanyProvider = ({ children }) => {
     try {
       setIsLoading(true);
       setError(null);
-      
+
       const userString = localStorage.getItem('user');
-      
-     /*  if (!userString) {
+
+      // Check if user data exists
+      if (!userString) {
         throw new Error('User data not found in localStorage');
       }
-       */
+
       let user;
       try {
         user = JSON.parse(userString);
       } catch (parseError) {
         throw new Error('Invalid user data in localStorage');
       }
+
       const companyId = user?.companyId;
+      if (!companyId || companyId === 'undefined') {
+        throw new Error('Company ID not found in user data');
+      }
       const response = await api.get(`/companies/${companyId}`);
       setCompany(response.data);
     } catch (error) {
       console.error("Error fetching company:", error);
-      setError(error.message);
+      setError(error.message || 'Failed to fetch company data');
     } finally {
       setIsLoading(false);
     }
@@ -55,6 +57,7 @@ export const CompanyProvider = ({ children }) => {
     error,
     fetchCompany,
   };
+
   return (
     <CompanyContext.Provider value={value}>
       {children}
