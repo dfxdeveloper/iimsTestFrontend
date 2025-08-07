@@ -8,25 +8,19 @@ import { showToast } from "../../../services/config/toast";
 import { Toaster } from "react-hot-toast";
 
 const IndentModule = ({ onClose }) => {
-  // Company details
   const [isLoading, setIsLoading] = useState(false);
   const [companyDetails, setCompanyDetails] = useState({
-    department: "",
     indentNo: "",
-    indentDate: "",
     piNo: "",
     piDate: "",
+    customerName: "",
     plantCode: "",
-    customer: "",
-    shipmentDate: "",
-    materialDueDate: "",
-    referenceNo: "",
-    customerPONo: "",
+    reference: "",
   });
 
   const [expandableTableData, setExpandableTableData] = useState([
     {
-      id: "A",
+      id: "1",
       title: "100 % Normal Cotton canvas - 10 Oz Natural washed fabric - 10×6",
       expanded: true,
       dynamicColumns: [],
@@ -61,7 +55,7 @@ const IndentModule = ({ onClose }) => {
       ],
     },
     {
-      id: "B",
+      id: "2",
       title: "100 % Normal cotton canvas 8 Oz Natural washed fabric. - 16 ×8",
       expanded: false,
       dynamicColumns: [],
@@ -87,7 +81,7 @@ const IndentModule = ({ onClose }) => {
       ],
     },
     {
-      id: "C",
+      id: "3",
       title: "100% Normal cotton canvas 12 Oz Natural (unwashed) fabric",
       expanded: false,
       dynamicColumns: [],
@@ -359,7 +353,7 @@ const IndentModule = ({ onClose }) => {
       // For example: await submitForm(formData);
 
       showToast.success("Indent Created successfully");
-      handleCancel()
+      handleCancel();
     } catch (error) {
       console.error(error);
       showToast.error("Failed to publish the indent", error);
@@ -405,19 +399,19 @@ const IndentModule = ({ onClose }) => {
         {/* Header */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 py-2 gap-4">
           {[
-            "department",
             "indentNo",
-            "indentDate",
             "piNo",
             "piDate",
+            "customerName",
             "plantCode",
-            "customer",
-            "shipmentDate",
-            "materialDueDate",
-            "referenceNo",
-            "customerPONo",
+            "reference",
           ].map((field) => (
-            <div key={field} className="flex flex-col">
+            <div
+              key={field}
+              className={`flex flex-col ${
+                field === "indentNo" ? "lg:col-span-2" : ""
+              }`}
+            >
               <label className="text-xs mb-1 h-6 flex items-center capitalize">
                 {field.replace(/([A-Z])/g, " $1")}
               </label>
@@ -427,7 +421,11 @@ const IndentModule = ({ onClose }) => {
                 onChange={(e) =>
                   handleCompanyDetailChange(field, e.target.value)
                 }
-                className="border border-[#B3E2FF] rounded px-2 py-1 text-xs shadow-inner focus:outline-none focus:ring-1 focus:ring-[#2B86AA]"
+                className={`border border-[#B3E2FF] rounded px-2 py-1 text-xs shadow-inner focus:outline-none focus:ring-1 focus:ring-[#2B86AA] ${
+                  field === "indentNo"
+                    ? "bg-[#FFEAB0] border border-[#E7BD00]"
+                    : ""
+                } `}
               />
             </div>
           ))}
@@ -440,43 +438,10 @@ const IndentModule = ({ onClose }) => {
               <thead>
                 <tr className="bg-[#F1FBFF] border-b border-[#EAECF0]">
                   <th className="py-3 px-4 text-left text-sm font-bold text-[#002533] border-r border-[#EAECF0] w-12">
-                    <svg width="28" height="20" viewBox="0 0 32 24" fill="none">
-                      <rect
-                        x="0"
-                        y="2"
-                        width="32"
-                        height="3"
-                        rx="1.5"
-                        fill="#000000"
-                      />
-                      <rect
-                        x="0"
-                        y="8"
-                        width="20"
-                        height="3"
-                        rx="1.5"
-                        fill="#000000"
-                      />
-                      <rect
-                        x="0"
-                        y="14"
-                        width="28"
-                        height="3"
-                        rx="1.5"
-                        fill="#000000"
-                      />
-                      <rect
-                        x="0"
-                        y="20"
-                        width="20"
-                        height="3"
-                        rx="1.5"
-                        fill="#000000"
-                      />
-                    </svg>
+                    S.No
                   </th>
                   <th className="py-3 px-4 text-left text-sm font-medium text-[#002533] border-r border-[#EAECF0]">
-                    Material Name
+                    Article Name
                   </th>
                   <th className="py-3 px-4 text-center text-sm font-medium text-[#002533] border-r border-[#EAECF0]">
                     UOM
@@ -557,10 +522,10 @@ const IndentModule = ({ onClose }) => {
                         <thead>
                           <tr className="bg-[#F1FBFF] border-b border-[#2B86AA]">
                             <th className="py-1 px-4 text-sm font-medium text-[#171A1F] text-center border-r border-[#2B86AA] w-16">
-                              S no.
+                              S.No
                             </th>
                             <th className="py-1 px-4 text-sm font-medium text-[#171A1F] text-left border-r border-[#2B86AA]">
-                              Material / Article Name
+                              Material Name
                             </th>
                             <th className="py-1 px-4 text-sm font-medium text-[#171A1F] text-center border-r border-[#2B86AA] w-24">
                               UOM

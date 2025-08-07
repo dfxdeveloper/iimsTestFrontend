@@ -10,16 +10,29 @@ const CreatePartner = ({
   onSuccess,
   editMode = false,
   partnerData = null,
+  restrictedType = null, // New prop to restrict type selection
 }) => {
   const userData = JSON.parse(localStorage.getItem("user") || "{}");
   const departmentName = userData.department;
+  const isRestrictedUser = departmentName === "trims" || departmentName === "fabric";
+  const isMarketingUser = departmentName === "marketing";
+  
   const { countries, states, cities, fetchStates, fetchCities } = useLocation();
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [selectedState, setSelectedState] = useState(null);
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Determine default type based on department or restrictedType prop
+  const getDefaultType = () => {
+    if (restrictedType) return restrictedType;
+    if (isRestrictedUser) return "vendor";
+    if (isMarketingUser) return "customer";
+    return "";
+  };
+
   const [formData, setFormData] = useState({
-    type: "",
+    type: getDefaultType(),
     clientName: "",
     address1: "",
     address2: "",
@@ -50,7 +63,7 @@ const CreatePartner = ({
     if (editMode && partnerData) {
       setFormData((prevData) => ({
         ...prevData,
-        type: partnerData.type || "",
+        type: partnerData.type || getDefaultType(),
         clientName: partnerData.clientName || "",
         address1: partnerData.address1 || "",
         address2: partnerData.address2 || "",
@@ -76,7 +89,7 @@ const CreatePartner = ({
         setSelectedCountry(countryObj || null);
       }
     }
-  }, [editMode, partnerData, departmentName, countries]);
+  }, [editMode, partnerData, departmentName, countries, restrictedType]);
 
   // Effect for fetching states when country changes or in edit mode
   useEffect(() => {
@@ -338,10 +351,60 @@ const CreatePartner = ({
     return `${prefix}-${timestamp}`;
   };
 
+  // Get UI text based on department
+  const getUIText = () => {
+    if (isRestrictedUser) {
+      return {
+        title: editMode ? "Edit Vendor" : "Create Vendor",
+        nameLabel: "Vendor Name",
+        namePlaceholder: "Enter vendor name",
+        loadingText: editMode ? "Updating vendor details..." : "Adding new vendor...",
+        successText: editMode ? "Vendor updated successfully! 🎉" : "Vendor added successfully! 🎉",
+        errorText: editMode ? "Failed to update vendor" : "Failed to add vendor"
+      };
+    } else if (isMarketingUser) {
+      return {
+        title: editMode ? "Edit Customer" : "Create Customer",
+        nameLabel: "Customer Name",
+        namePlaceholder: "Enter customer name",
+        loadingText: editMode ? "Updating customer details..." : "Adding new customer...",
+        successText: editMode ? "Customer updated successfully! 🎉" : "Customer added successfully! 🎉",
+        errorText: editMode ? "Failed to update customer" : "Failed to add customer"
+      };
+    }
+    return {
+      title: editMode ? "Edit Partner" : "Create Partner",
+      nameLabel: "Client Name",
+      namePlaceholder: "Enter client name",
+      loadingText: editMode ? "Updating partner details..." : "Adding new partner...",
+      successText: editMode ? "Partner updated successfully! 🎉" : "Partner added successfully! 🎉",
+      errorText: editMode ? "Failed to update partner" : "Failed to add partner"
+    };
+  };
+
+  const uiText = getUIText();
+
+ const shouldShowTypeDropdown = () => {
+  return true;
+};
+
+  const getTypeOptions = () => {
+  if (restrictedType === "vendor" || isRestrictedUser) {
+    return [{ value: "vendor", label: "Vendor" }];
+  } else if (restrictedType === "customer" || isMarketingUser) {
+    return [{ value: "customer", label: "Customer" }];
+  }
+  return [
+    { value: "vendor", label: "Vendor" },
+    { value: "customer", label: "Customer" }
+  ];
+};
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     if (!validateForm()) {
+      setIsLoading(false);
       return;
     }
     const dataToSubmit = {
@@ -354,20 +417,20 @@ const CreatePartner = ({
         await showToast.promise(
           api.put(`/partners/${partnerData._id}`, dataToSubmit),
           {
-            loading: "Updating partner details...",
-            success: "Partner updated successfully! 🎉",
+            loading: uiText.loadingText,
+            success: uiText.successText,
             error: (error) =>
-              `Failed to update partner: ${
+              `${uiText.errorText}: ${
                 error.response?.data?.message || "Unknown error"
               }`,
           }
         );
       } else {
         await showToast.promise(api.post("/partners", dataToSubmit), {
-          loading: "Adding new partner...",
-          success: "Partner added successfully! 🎉",
+          loading: uiText.loadingText,
+          success: uiText.successText,
           error: (error) =>
-            `Failed to add partner: ${
+            `${uiText.errorText}: ${
               error.response?.data?.message || "Unknown error"
             }`,
         });
@@ -395,56 +458,61 @@ const CreatePartner = ({
 
         <div>
           <h1 className="text-2xl font-medium text-gray-800 mb-6">
-            {editMode ? "Edit Partner" : "Create Partner"}
+            {uiText.title}
           </h1>
           <form
             onSubmit={handleSubmit}
             className="border border-[#2B86AA] rounded-md p-6"
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              {/* Type of Partners */}
-              <div>
-                <label
-                  htmlFor="type"
-                  className="block mb-1 text-sm font-medium text-gray-700"
-                >
-                  Type of Partners
-                </label>
-                <div className="relative">
-                  <select
-                    id="type"
-                    name="type"
-                    value={formData.type}
-                    onChange={handleTypeChange}
-                    className={`w-full px-4 py-3 bg-[#F1FBFF] border appearance-none rounded-md text-gray-700 ${
-                      errors.type ? "border-red-500" : "border-[#ABE7FF]"
-                    }`}
+              {/* Type of Partners - Show based on department restrictions */}
+              {shouldShowTypeDropdown() && (
+                <div>
+                  <label
+                    htmlFor="type"
+                    className="block mb-1 text-sm font-medium text-gray-700"
                   >
-                    <option value="">Select Type</option>
-                    <option value="vendor">Vendor</option>
-                    <option value="customer">Customer</option>
-                  </select>
-                  <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                    <svg
-                      className="w-4 h-4 text-gray-500"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
+                    Type of Partners
+                  </label>
+                  <div className="relative">
+                    <select
+                      id="type"
+                      name="type"
+                      value={formData.type}
+                      onChange={handleTypeChange}
+                      className={`w-full px-4 py-3 bg-[#F1FBFF] border appearance-none rounded-md text-gray-700 ${
+                        errors.type ? "border-red-500" : "border-[#ABE7FF]"
+                      }`}
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M19 9l-7 7-7-7"
-                      ></path>
-                    </svg>
+                      <option value="">Select Type</option>
+                      {getTypeOptions().map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                      <svg
+                        className="w-4 h-4 text-gray-500"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M19 9l-7 7-7-7"
+                        ></path>
+                      </svg>
+                    </div>
+                    {errors.type && (
+                      <p className="text-red-500 text-xs mt-1">{errors.type}</p>
+                    )}
                   </div>
-                  {errors.type && (
-                    <p className="text-red-500 text-xs mt-1">{errors.type}</p>
-                  )}
                 </div>
-              </div>
+              )}
 
               {/* Client Name */}
               <div>
@@ -452,7 +520,7 @@ const CreatePartner = ({
                   htmlFor="clientName"
                   className="block mb-1 text-sm font-medium text-gray-700"
                 >
-                  Client Name
+                  {uiText.nameLabel}
                 </label>
                 <input
                   type="text"
@@ -460,7 +528,7 @@ const CreatePartner = ({
                   name="clientName"
                   value={formData.clientName}
                   onChange={handleInputChange}
-                  placeholder="Enter client name"
+                  placeholder={uiText.namePlaceholder}
                   className={`w-full px-4 py-3 bg-[#F1FBFF] border rounded-md text-gray-700 ${
                     errors.clientName ? "border-red-500" : "border-[#ABE7FF]"
                   }`}

@@ -34,11 +34,26 @@ const Partners = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(8);
 
+  // Get user department
+  const userData = JSON.parse(localStorage.getItem("user") || "{}");
+  const userDepartment = userData.department;
+  const isRestrictedUser = userDepartment === "trims" || userDepartment === "fabric";
+  const isMarketingUser = userDepartment === "marketing";
+
   const fetchPartners = async () => {
     try {
       setIsLoading(true);
       const response = await api.get("/partners");
-      const formattedPartners = response.data.map((partner, index) => ({
+      let partnersData = response.data;
+      
+      // Filter partners based on user department
+      if (isRestrictedUser) {
+        partnersData = partnersData.filter(partner => partner.type === "vendor");
+      } else if (isMarketingUser) {
+        partnersData = partnersData.filter(partner => partner.type === "customer");
+      }
+      
+      const formattedPartners = partnersData.map((partner, index) => ({
         srNo: (index + 1).toString().padStart(2, "0"),
         type: partner.type,
         clientName: partner.clientName,
@@ -60,6 +75,15 @@ const Partners = () => {
   useEffect(() => {
     fetchPartners();
   }, []);
+
+  // Set default tab for restricted users
+  useEffect(() => {
+    if (isRestrictedUser) {
+      setActiveTab("vendors");
+    } else if (isMarketingUser) {
+      setActiveTab("customers");
+    }
+  }, [isRestrictedUser, isMarketingUser]);
 
   const handleCloseAddPartner = () => {
     setShowAddNew(false);
@@ -166,6 +190,46 @@ const Partners = () => {
     return matchesSearch && matchesTab;
   });
 
+  // Get available tabs based on user department
+  const getAvailableTabs = () => {
+    if (isRestrictedUser) {
+      return ["vendors"];
+    } else if (isMarketingUser) {
+      return ["customers"];
+    }
+    return ["all", "vendors", "customers"];
+  };
+
+  // Get button text and placeholder based on user department
+  const getUIText = () => {
+    if (isRestrictedUser) {
+      return {
+        addButton: "Add New Vendor",
+        searchPlaceholder: "Search vendors...",
+        noDataMessage: "No vendors found",
+        editTooltip: "Edit Vendor",
+        deleteTooltip: "Delete Vendor"
+      };
+    } else if (isMarketingUser) {
+      return {
+        addButton: "Add New Customer",
+        searchPlaceholder: "Search customers...",
+        noDataMessage: "No customers found",
+        editTooltip: "Edit Customer",
+        deleteTooltip: "Delete Customer"
+      };
+    }
+    return {
+      addButton: "Add New Partner",
+      searchPlaceholder: "Search partners...",
+      noDataMessage: "No partners found",
+      editTooltip: "Edit Partner",
+      deleteTooltip: "Delete Partner"
+    };
+  };
+
+  const uiText = getUIText();
+
   if (showAddNew) {
     return (
       <Suspense fallback={<div>Loading...</div>}>
@@ -174,6 +238,7 @@ const Partners = () => {
           onSuccess={handleSuccess}
           editMode={!!editingPartner}
           partnerData={editingPartner}
+          restrictedType={isRestrictedUser ? "vendor" : isMarketingUser ? "customer" : null}
         />
       </Suspense>
     );
@@ -204,7 +269,7 @@ const Partners = () => {
             />
             <input
               type="text"
-              placeholder="Search partners..."
+              placeholder={uiText.searchPlaceholder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full sm:w-48 md:w-64 pl-10 pr-4 py-2 rounded-lg border border-[#ABE7FF] focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
@@ -217,7 +282,7 @@ const Partners = () => {
             className="flex items-center gap-2 bg-[#2B86AA] hover:bg-[#43a6ce] text-white px-4 py-2 rounded-lg transition-colors duration-200"
           >
             <Plus size={20} />
-            Add New Partner
+            {uiText.addButton}
           </button>
         </div>
       </div>
@@ -225,7 +290,7 @@ const Partners = () => {
       <div className="mb-6">
         <div className="border-b border-[#2B86AA]">
           <nav className="-mb-px flex space-x-8">
-            {["all", "vendors", "customers"].map((tab) => (
+            {getAvailableTabs().map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -302,14 +367,14 @@ const Partners = () => {
           <TableBody sx={{ fontFamily: "Inter, sans-serif", color: "#171A1F" }}>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={8} align="center">
+                <TableCell colSpan={9} align="center">
                   Loading...
                 </TableCell>
               </TableRow>
             ) : filteredPartners.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} align="center">
-                  No partners found
+                <TableCell colSpan={9} align="center">
+                  {uiText.noDataMessage}
                 </TableCell>
               </TableRow>
             ) : (
@@ -322,7 +387,7 @@ const Partners = () => {
                     <TableCell>
                       <span
                         className={`px-2 py-1 rounded-full text-sm ${
-                          row.type === "Vendor"
+                          row.type === "vendor"
                             ? "bg-blue-100 text-blue-600"
                             : "bg-green-100 text-green-600"
                         }`}
@@ -337,7 +402,7 @@ const Partners = () => {
                     <TableCell>{row.pinCode}</TableCell>
                     <TableCell align="center">
                       <div className="flex gap-3 justify-center">
-                        <Tooltip title="Edit Partner">
+                        <Tooltip title={uiText.editTooltip}>
                           <IconButton
                             size="small"
                             onClick={() => handleEdit(row)}
@@ -348,7 +413,7 @@ const Partners = () => {
                             <Edit size={20} />
                           </IconButton>
                         </Tooltip>
-                        <Tooltip title="Delete Partner">
+                        <Tooltip title={uiText.deleteTooltip}>
                           <IconButton
                             size="small"
                             onClick={() => handleDeleteClick(row)}

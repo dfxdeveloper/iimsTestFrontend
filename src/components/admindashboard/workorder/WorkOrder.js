@@ -20,7 +20,7 @@ const WorkOrder = () => {
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [openDropdown, setOpenDropdown] = useState(null);
-  const [dropdownPosition, setDropdownPosition] = useState({}); 
+  const [dropdownPosition, setDropdownPosition] = useState({});
   const dropdownRef = useRef(null);
 
   const [workOrders, setWorkOrder] = useState([
@@ -33,6 +33,22 @@ const WorkOrder = () => {
       date: "2024-02-19",
     },
   ]);
+
+  const getUserDepartment = () => {
+    try {
+      const userData = JSON.parse(localStorage.getItem("user")) || {};
+      return userData.department;
+    } catch (error) {
+      console.error("Error getting user department:", error);
+      return null;
+    }
+  };
+
+  const userDepartment = getUserDepartment();
+  const ispermission =
+    userDepartment === "fabric" ||
+    userDepartment === "trims" ||
+    userDepartment === "production";
 
   // Simulate data loading
   useEffect(() => {
@@ -62,7 +78,7 @@ const WorkOrder = () => {
     setIsLoading(true);
     try {
       // Simulate export process
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       const data = getFilteredData();
       const csv = [
         Object.keys(data[0]).join(","),
@@ -79,7 +95,7 @@ const WorkOrder = () => {
       a.click();
       document.body.removeChild(a);
     } catch (error) {
-      console.error('Export failed:', error);
+      console.error("Export failed:", error);
     } finally {
       setIsLoading(false);
     }
@@ -110,9 +126,12 @@ const WorkOrder = () => {
     const dropdownHeight = 240; // 6 items * 40px per item approximately
     const spaceBelow = windowHeight - rect.bottom;
     const spaceAbove = rect.top;
-    
+
     // More lenient positioning logic - prefer showing below unless clearly not enough space
-    const shouldOpenUp = spaceBelow < dropdownHeight && spaceAbove > dropdownHeight && spaceAbove > 150;
+    const shouldOpenUp =
+      spaceBelow < dropdownHeight &&
+      spaceAbove > dropdownHeight &&
+      spaceAbove > 150;
 
     return {
       openUp: shouldOpenUp,
@@ -127,7 +146,11 @@ const WorkOrder = () => {
     } else {
       const buttonElement = event.currentTarget;
       const totalRows = getPaginatedData().length;
-      const position = calculateDropdownPosition(buttonElement, rowIndex, totalRows);
+      const position = calculateDropdownPosition(
+        buttonElement,
+        rowIndex,
+        totalRows
+      );
       setDropdownPosition({ [id]: position });
       setOpenDropdown(id);
     }
@@ -138,10 +161,10 @@ const WorkOrder = () => {
     try {
       console.log(`Selected ${pdfType} for ID: ${id}`);
       // Simulate PDF generation/download process
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise((resolve) => setTimeout(resolve, 1500));
       // Add your PDF generation/download logic here
     } catch (error) {
-      console.error('Error generating PDF:', error);
+      console.error("Error generating PDF:", error);
     } finally {
       setIsLoading(false);
       setOpenDropdown(null);
@@ -157,7 +180,7 @@ const WorkOrder = () => {
     { id: "R4", label: "R4" },
     { id: "R5", label: "R5" },
   ];
-  
+
   const getPaginatedData = () => {
     const filteredData = getFilteredData();
     return filteredData.slice(
@@ -189,7 +212,7 @@ const WorkOrder = () => {
 
   return (
     <>
-      {isLoading && <Loader/>}
+      {isLoading && <Loader />}
       <div className="p-4">
         <style jsx>{`
           /* Enhanced scrollbar styling for dropdown */
@@ -229,7 +252,8 @@ const WorkOrder = () => {
             min-width: 140px;
             background: white;
             border-radius: 8px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15),
+              0 4px 8px rgba(0, 0, 0, 0.1);
             border: 1px solid #e1f6ff;
             overflow: hidden;
             z-index: 9999;
@@ -327,7 +351,7 @@ const WorkOrder = () => {
             <button
               onClick={handleExport}
               disabled={isLoading}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 bg-white text-[#2B86AA] rounded-lg border border-[#2B86AA] focus:outline-none focus:ring-2 focus:ring-offset-2 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
@@ -348,27 +372,28 @@ const WorkOrder = () => {
               )}
               Export
             </button>
-
-            <button
-              onClick={handleCreateNewWorkOrder}
-              disabled={isLoading}
-              className="px-4 py-2 bg-[#2B86AA] text-white rounded-lg hover:bg-[#43a6ce] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+            {!ispermission && (
+              <button
+                onClick={handleCreateNewWorkOrder}
+                disabled={isLoading}
+                className="px-4 py-2 bg-[#2B86AA] text-white rounded-lg hover:bg-[#43a6ce] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
-              New Work Order
-            </button>
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+                New Work Order
+              </button>
+            )}
           </div>
         </div>
 
@@ -416,8 +441,11 @@ const WorkOrder = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex gap-2">
+                       {!ispermission && (
                       <button
-                        className={`text-gray-600 hover:text-gray-800 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        className={`text-gray-600 hover:text-gray-800 ${
+                          isLoading ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
                         disabled={isLoading}
                       >
                         <svg
@@ -434,10 +462,15 @@ const WorkOrder = () => {
                           />
                         </svg>
                       </button>
-
+                       )}
                       <button
-                        onClick={(e) => !isLoading && handlePdfDropdownToggle(workorder._id, e, index)}
-                        className={`text-gray-600 hover:text-gray-800 flex items-center gap-1 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        onClick={(e) =>
+                          !isLoading &&
+                          handlePdfDropdownToggle(workorder._id, e, index)
+                        }
+                        className={`text-gray-600 hover:text-gray-800 flex items-center gap-1 ${
+                          isLoading ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
                         disabled={isLoading}
                       >
                         <svg
@@ -464,7 +497,9 @@ const WorkOrder = () => {
                                 : "top-full mt-2"
                             }`}
                             style={{
-                              maxHeight: dropdownPosition[workorder._id]?.maxHeight || "240px",
+                              maxHeight:
+                                dropdownPosition[workorder._id]?.maxHeight ||
+                                "240px",
                               overflowY: "auto",
                             }}
                           >

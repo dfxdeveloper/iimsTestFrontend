@@ -377,9 +377,6 @@ const MarketingTeamDashboard = () => {
               <p className="text-xs text-gray-200 truncate">
                 {user?.authorizedEmail || "marketing@company.com"}
               </p>
-              <span className="inline-block mt-1 px-2 py-0.5 text-xs font-medium text-emerald-700 bg-emerald-100 rounded-full">
-                Online
-              </span>
             </div>
           </div>
         </div>

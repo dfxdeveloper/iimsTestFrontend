@@ -1419,7 +1419,9 @@ export default function AddProformaInvoice({
                 }`}
               >
                 <label className="text-xs mb-1 h-6 flex items-center">
-                  <span className="font-regular text-[#171A1F] text-sm py-1.5 rounded">
+                  <span
+                    className={`font-regular text-[#171A1F] text-sm py-1.5 rounded`}
+                  >
                     {field.label}
                   </span>
                 </label>
@@ -1469,7 +1471,11 @@ export default function AddProformaInvoice({
                       "contactPerson",
                       "customerAddress",
                     ].includes(field.key)}
-                    className={`border border-[#B3E2FF] rounded px-2 py-1.5 text-sm shadow-inner text-[#171A1F] focus:outline-none bg-gray-50 ${
+                    className={`border rounded px-2 py-1.5 text-sm shadow-inner text-[#171A1F] focus:outline-none ${
+                      field.key === "piNumber"
+                        ? "bg-[#FFEAB0] border-[#E7BD00]"
+                        : "border-[#B3E2FF] bg-gray-50"
+                    } ${
                       [
                         "date",
                         "piNumber",
@@ -1492,7 +1498,7 @@ export default function AddProformaInvoice({
                   field.label === "Customer Address"
                     ? "lg:col-span-8"
                     : "lg:col-span-4"
-                }`}
+                } `}
               >
                 <label className="text-xs mb-1 h-6 flex items-center">
                   <span className="font-regular text-[#171A1F] text-sm px-2 py-1.5 rounded">

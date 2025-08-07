@@ -19,13 +19,14 @@ const Indent = () => {
   const dropdownRef = useRef(null);
   const [partners, setPartners] = useState([]);
 
-  // Simulate initial data loading
+   const userData = JSON.parse(localStorage.getItem("user") || "{}");
+  const userDepartment = userData.department;
+  const isRestrictedUser = userDepartment === "trims" || userDepartment === "fabric" || userDepartment === "production";
+
   useEffect(() => {
     const loadInitialData = async () => {
       try {
-        // Simulate API call to fetch initial data
         await new Promise(resolve => setTimeout(resolve, 1500));
-        
         setPartners([
           {
             _id: "1",
@@ -377,7 +378,7 @@ const Indent = () => {
           <button
             onClick={handleExport}
             disabled={loading}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 bg-white text-[#2B86AA] rounded-lg border border-[#2B86AA] focus:outline-none focus:ring-offset-2 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
@@ -399,26 +400,28 @@ const Indent = () => {
             Export
           </button>
 
-          <button
-            onClick={() => setShowForm(true)}
-            disabled={loading}
-            className="px-4 py-2 bg-[#2B86AA] text-white rounded-lg hover:bg-[#43a6ce] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-            Create Indent
-          </button>
+          {!isRestrictedUser && (
+  <button
+    onClick={() => setShowForm(true)}
+    disabled={loading}
+    className="px-4 py-2 bg-[#2B86AA] text-white rounded-lg hover:bg-[#43a6ce] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+  >
+    <svg
+      className="w-5 h-5"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        d="M12 4v16m8-8H4"
+      />
+    </svg>
+    Create Indent
+  </button>
+)}
         </div>
       </div>
 
@@ -461,24 +464,26 @@ const Indent = () => {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex gap-2">
-                    <button 
-                      className={`text-gray-600 hover:text-gray-800 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                      disabled={loading}
-                    >
-                      <svg
-                        className="w-5 h-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                        />
-                      </svg>
-                    </button>
+                 {!isRestrictedUser && (
+      <button 
+        className={`text-gray-600 hover:text-gray-800 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+        disabled={loading}
+      >
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+          />
+        </svg>
+      </button>
+    )}
                      <button
                         onClick={(e) => !loading && handlePdfDropdownToggle(partner._id, e, index)}
                         className={`text-gray-600 hover:text-gray-800 flex items-center gap-1 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}

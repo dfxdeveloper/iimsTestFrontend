@@ -26,22 +26,16 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../services/context/auth";
 import ProfileModal from "../admindashboard/ProfileModal";
-const MerchandiseDashboard = React.lazy(() => import("./MerchandiseDashboard"));
-const Partners = React.lazy(() =>
-  import("../admindashboard/partners/Partners")
+const ProductionDashboard = React.lazy(() => import("./ProductionDashboard"));
+const ProformaInvoice = React.lazy(() =>
+  import("../admindashboard/proformainvoice/Proformainvoice")
 );
 const Indent = React.lazy(() => import("../admindashboard/indent/Indent"));
 const WorkOrder = React.lazy(() =>
   import("../admindashboard/workorder/WorkOrder")
 );
-const ProformaInvoice = React.lazy(() =>
-  import("../admindashboard/proformainvoice/Proformainvoice")
-);
-const CommercialInvoice = React.lazy(() =>
-  import("../admindashboard/commercialinvoice/CommercialInvoice")
-);
 const Stock = React.lazy(() => import("../admindashboard/stock/Stock"));
-const MerchandiseTeamDashboard = () => {
+const ProductionTeamDashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout, user } = useAuth();
@@ -54,49 +48,42 @@ const MerchandiseTeamDashboard = () => {
   const profileDropdownRef = useRef(null);
 
   const navItems = [
-    { path: "/merchandise/dashboard", label: "Mechandise Dashboard" },
-    { path: "/merchandise/indent", label: "Indent" },
-    { path: "/merchandise/work-order", label: "Work Order" },
-    { path: "/merchandise/proformainvoice", label: "Proforma Invoice" },
-    { path: "/merchandise/commercialinvoice", label: "Commercial Invoice" },
-    { path: "/merchandise/stock", label: "Stock" },
+    { path: "/production/dashboard", label: "Production Dashboard" },
+    { path: "/production/proformainvoice", label: "Proforma Invoice" },
+    { path: "/production/indent", label: "Indent" },
+    { path: "/production/work-order", label: "Work Order" },
+    { path: "/production/stock", label: "Stock" },
   ];
 
   const sidebarItems = [
     {
       id: "dashboard",
-      label: "Merchandise Dashboard",
-      path: "/merchandise/dashboard",
+      label: "Production Dashboard",
+      path: "/production/dashboard",
       icon: LayoutGrid,
     },
     {
       id: "proformaInvoice",
       label: "Proforma Invoice",
-      path: "/merchandise/proformainvoice",
+      path: "/production/proformainvoice",
       icon: FileText,
     },
     {
       id: "indent",
       label: "Indent",
-      path: "/merchandise/indent",
+      path: "/production/indent",
       icon: ClipboardList,
     },
     {
       id: "workOrder",
       label: "Work Order",
-      path: "/merchandise/work-order",
+      path: "/production/work-order",
       icon: Settings,
-    },
-    {
-      id: "commercialInvoice",
-      label: "Commercial Invoice",
-      path: "/merchandise/commercialinvoice",
-      icon: FileText,
     },
     {
       id: "stock",
       label: "Stock",
-      path: "/merchandise/stock",
+      path: "/production/stock",
       icon: Box,
     },
   ];
@@ -143,7 +130,7 @@ const MerchandiseTeamDashboard = () => {
     setIsProfileDropdownOpen(!isProfileDropdownOpen);
 
   const formatDepartmentName = (department) => {
-    if (!department) return "Merchandise";
+    if (!department) return "Production";
     return department
       .split("_")
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
@@ -343,7 +330,7 @@ const MerchandiseTeamDashboard = () => {
       >
         <div className="px-4 py-5 border-b dark:border-gray-700 bg-[#2B86AA] dark:bg-gray-800">
           <Link
-            to="/merchandise/dashboard"
+            to="/production/dashboard"
             className="flex items-center p-2 bg-white dark:bg-gray-700 space-x-3 rounded-full"
           >
             <img
@@ -377,7 +364,7 @@ const MerchandiseTeamDashboard = () => {
                 {formatDepartmentName(user?.department)}
               </h3>
               <p className="text-xs text-gray-200 truncate">
-                {user?.authorizedEmail || "merchandise@company.com"}
+                {user?.authorizedEmail || "production@company.com"}
               </p>
             </div>
           </div>
@@ -385,7 +372,6 @@ const MerchandiseTeamDashboard = () => {
       </aside>
 
       <LogoutModal />
-
       <div
         className={`
           fixed right-0 top-0 w-80 h-full bg-white dark:bg-gray-800 shadow-lg border-l dark:border-gray-700
@@ -450,7 +436,7 @@ const MerchandiseTeamDashboard = () => {
               </button>
               <h1 className="text-3xl font-semibold text-[#171A1F] dark:text-white">
                 {navItems.find((item) => item.path === location.pathname)
-                  ?.label || "merchandise Dashboard"}
+                  ?.label || "Production Dashboard"}
               </h1>
             </div>
             <div className="flex items-center gap-3">
@@ -494,10 +480,10 @@ const MerchandiseTeamDashboard = () => {
                             {formatDepartmentName(user?.department)}
                           </h3>
                           <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
-                            {user?.authorizedEmail || "merchandise@company.com"}
+                            {user?.authorizedEmail || "production@company.com"}
                           </p>
                           <span className="inline-block mt-1 px-2 py-0.5 text-xs font-medium text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30 rounded">
-                            Merchandise
+                            Production
                           </span>
                         </div>
                       </div>
@@ -544,19 +530,16 @@ const MerchandiseTeamDashboard = () => {
             <Routes>
               <Route
                 index
-                element={<Navigate to="/merchandise/dashboard" replace />}
+                element={<Navigate to="/production/dashboard" replace />}
               />
-              <Route path="dashboard" element={<MerchandiseDashboard />} />
-              <Route path="indent" element={<Indent />} />
-              <Route path="partners" element={<Partners />} />
-              <Route path="work-order" element={<WorkOrder />} />
+              <Route path="dashboard" element={<ProductionDashboard />} />
               <Route path="proformainvoice" element={<ProformaInvoice />} />
-              <Route path="commercialinvoice" element={<CommercialInvoice />} />
+              <Route path="indent" element={<Indent />} />
+              <Route path="work-order" element={<WorkOrder />} />
               <Route path="stock" element={<Stock />} />
-
               <Route
                 path="*"
-                element={<Navigate to="/merchandise/dashboard" replace />}
+                element={<Navigate to="/production/dashboard" replace />}
               />
             </Routes>
           </Suspense>
@@ -571,4 +554,4 @@ const MerchandiseTeamDashboard = () => {
   );
 };
 
-export default MerchandiseTeamDashboard;
+export default ProductionTeamDashboard;

@@ -6,6 +6,7 @@ export const departmentOptions = [
   { label: "Trims", value: "trims" },
   { label: "Fabric", value: "fabric" },
   { label: "Logistic", value: "logistic" },
+  {label: "Production", value: "production"}
 ];
 
 export const plantAccessOptions = [

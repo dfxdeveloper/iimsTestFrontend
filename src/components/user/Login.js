@@ -109,6 +109,18 @@ const Login = () => {
                else if(response.data.department === "merchandise_marketing"){
                 navigate("/merchandise/dashboard");
               }
+              else if(response.data.department === "trims"){
+                navigate("/trims/dashboard");
+              }
+              else if(response.data.department === "fabric"){
+                navigate("/fabric/dashboard");
+              }
+              else if(response.data.department === "logistic"){
+                navigate("/logistics/dashboard");
+              }
+              else if(response.data.department === "production"){
+                navigate("/production/dashboard");
+              }
               else {
                 navigate('/');
               }

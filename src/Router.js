@@ -13,6 +13,10 @@ const MasterAdminDashboard = React.lazy(() => import("./components/masteradminda
 // const PerformaInvoice = React.lazy(() => import("./components/admindashboard/proformainvoice/AddproformaInvoice"));
 const MarketingTeamDashboard = React.lazy(() => import("./components/marketingteamdashboard/MarketingTeamDashboard"));
 const MerchandiseTeamDashboard = React.lazy(() => import("./components/merchandisemarketingdashboard/MerchandiseTeamDashboard"));
+const FabricTeamDashboard = React.lazy(() => import("./components/fabricdashboard/FabricTeamDashboard"));
+const TrimsTeamDashboard = React.lazy(() => import("./components/trimsdashboard/TrimsTeamDashboard"));
+const LogisticsTeamDashboard = React.lazy(() => import("./components/logisticsdashboard/LogisticsTeamDashboard"));
+const ProductionTeamDashboard = React.lazy(() => import("./components/productiondashboard/ProductionTeamDashboard"));
 
 // Loading fallback component
 const Loading = () => (
@@ -41,6 +45,10 @@ function Router() {
           <Route path="/masteradmin/*" element={<MasterAdminDashboard />} />
           <Route path="/marketing/*" element={<MarketingTeamDashboard />} />
           <Route path="/merchandise/*" element={<MerchandiseTeamDashboard />} />
+          <Route path="/fabric/*" element={<FabricTeamDashboard />} />
+          <Route path="/trims/*" element={<TrimsTeamDashboard />} />
+          <Route path="/logistics/*" element={<LogisticsTeamDashboard />} />
+          <Route path="/production/*" element={<ProductionTeamDashboard />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>

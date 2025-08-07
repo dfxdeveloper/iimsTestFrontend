@@ -26,22 +26,23 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../services/context/auth";
 import ProfileModal from "../admindashboard/ProfileModal";
-const MerchandiseDashboard = React.lazy(() => import("./MerchandiseDashboard"));
+const FabricDashboard = React.lazy(() => import("./FabricDashboard"));
 const Partners = React.lazy(() =>
   import("../admindashboard/partners/Partners")
 );
-const Indent = React.lazy(() => import("../admindashboard/indent/Indent"));
-const WorkOrder = React.lazy(() =>
-  import("../admindashboard/workorder/WorkOrder")
+const MaterialData = React.lazy(() =>
+  import("../admindashboard/materialdata/MaterialData")
 );
 const ProformaInvoice = React.lazy(() =>
   import("../admindashboard/proformainvoice/Proformainvoice")
 );
-const CommercialInvoice = React.lazy(() =>
-  import("../admindashboard/commercialinvoice/CommercialInvoice")
+const Indent = React.lazy(() => import("../admindashboard/indent/Indent"));
+const PurchaseOrder = React.lazy(() =>
+  import("../admindashboard/purchaseorder/PurchaseOrders")
 );
+const GRN = React.lazy(() => import("../admindashboard/grn/Grn"));
 const Stock = React.lazy(() => import("../admindashboard/stock/Stock"));
-const MerchandiseTeamDashboard = () => {
+const FabricTeamDashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout, user } = useAuth();
@@ -54,49 +55,71 @@ const MerchandiseTeamDashboard = () => {
   const profileDropdownRef = useRef(null);
 
   const navItems = [
-    { path: "/merchandise/dashboard", label: "Mechandise Dashboard" },
-    { path: "/merchandise/indent", label: "Indent" },
-    { path: "/merchandise/work-order", label: "Work Order" },
-    { path: "/merchandise/proformainvoice", label: "Proforma Invoice" },
-    { path: "/merchandise/commercialinvoice", label: "Commercial Invoice" },
-    { path: "/merchandise/stock", label: "Stock" },
+    { path: "/fabric/dashboard", label: "Fabric Dashboard" },
+    { path: "/fabric/partners", label: "Partner" },
+    { path: "/fabric/materialdata", label: "Material Data" },
+    { path: "/fabric/proformainvoice", label: "Proforma Invoice" },
+    { path: "/fabric/indent", label: "Indent" },
+    { path: "/fabric/purchaseorder", label: "Purchase Order" },
+    { path: "/fabric/grn", label: "GRN" },
+    { path: "/fabric/stock", label: "Stock" },
   ];
 
   const sidebarItems = [
     {
       id: "dashboard",
-      label: "Merchandise Dashboard",
-      path: "/merchandise/dashboard",
+      label: "Dashboard",
+      path: "/fabric/dashboard",
       icon: LayoutGrid,
+    },
+    {
+      id: "masterData",
+      label: "Master Data",
+      icon: Database,
+      isDropdown: true,
+      children: [
+        {
+          id: "partners",
+          label: "Partners",
+          path: "/fabric/partners",
+          icon: Users,
+        },
+        {
+          id: "materialData",
+          label: "Material Data",
+          path: "/fabric/materialdata",
+          icon: Box,
+        },
+      ],
     },
     {
       id: "proformaInvoice",
       label: "Proforma Invoice",
-      path: "/merchandise/proformainvoice",
+      path: "/trims/proformainvoice",
       icon: FileText,
     },
     {
       id: "indent",
       label: "Indent",
-      path: "/merchandise/indent",
+      path: "/fabric/indent",
       icon: ClipboardList,
     },
     {
-      id: "workOrder",
-      label: "Work Order",
-      path: "/merchandise/work-order",
-      icon: Settings,
+      id: "orders",
+      label: "Purchase Orders",
+      path: "/fabric/purchaseorder",
+      icon: Package,
     },
     {
-      id: "commercialInvoice",
-      label: "Commercial Invoice",
-      path: "/merchandise/commercialinvoice",
+      id: "grn",
+      label: "GRN",
+      path: "/fabric/grn",
       icon: FileText,
     },
     {
       id: "stock",
       label: "Stock",
-      path: "/merchandise/stock",
+      path: "/fabric/stock",
       icon: Box,
     },
   ];
@@ -143,7 +166,7 @@ const MerchandiseTeamDashboard = () => {
     setIsProfileDropdownOpen(!isProfileDropdownOpen);
 
   const formatDepartmentName = (department) => {
-    if (!department) return "Merchandise";
+    if (!department) return "Fabric";
     return department
       .split("_")
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
@@ -343,7 +366,7 @@ const MerchandiseTeamDashboard = () => {
       >
         <div className="px-4 py-5 border-b dark:border-gray-700 bg-[#2B86AA] dark:bg-gray-800">
           <Link
-            to="/merchandise/dashboard"
+            to="/fabric/dashboard"
             className="flex items-center p-2 bg-white dark:bg-gray-700 space-x-3 rounded-full"
           >
             <img
@@ -377,7 +400,7 @@ const MerchandiseTeamDashboard = () => {
                 {formatDepartmentName(user?.department)}
               </h3>
               <p className="text-xs text-gray-200 truncate">
-                {user?.authorizedEmail || "merchandise@company.com"}
+                {user?.authorizedEmail || "fabric@company.com"}
               </p>
             </div>
           </div>
@@ -450,7 +473,7 @@ const MerchandiseTeamDashboard = () => {
               </button>
               <h1 className="text-3xl font-semibold text-[#171A1F] dark:text-white">
                 {navItems.find((item) => item.path === location.pathname)
-                  ?.label || "merchandise Dashboard"}
+                  ?.label || "Fabric Dashboard"}
               </h1>
             </div>
             <div className="flex items-center gap-3">
@@ -494,10 +517,10 @@ const MerchandiseTeamDashboard = () => {
                             {formatDepartmentName(user?.department)}
                           </h3>
                           <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
-                            {user?.authorizedEmail || "merchandise@company.com"}
+                            {user?.authorizedEmail || "fabric@company.com"}
                           </p>
                           <span className="inline-block mt-1 px-2 py-0.5 text-xs font-medium text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30 rounded">
-                            Merchandise
+                            Fabric
                           </span>
                         </div>
                       </div>
@@ -544,19 +567,20 @@ const MerchandiseTeamDashboard = () => {
             <Routes>
               <Route
                 index
-                element={<Navigate to="/merchandise/dashboard" replace />}
+                element={<Navigate to="/fabric/dashboard" replace />}
               />
-              <Route path="dashboard" element={<MerchandiseDashboard />} />
-              <Route path="indent" element={<Indent />} />
+              <Route path="dashboard" element={<FabricDashboard />} />
               <Route path="partners" element={<Partners />} />
-              <Route path="work-order" element={<WorkOrder />} />
+              <Route path="materialdata" element={<MaterialData />} />
               <Route path="proformainvoice" element={<ProformaInvoice />} />
-              <Route path="commercialinvoice" element={<CommercialInvoice />} />
+              <Route path="indent" element={<Indent />} />
+              <Route path="purchaseorder" element={<PurchaseOrder />} />
+              <Route path="grn" element={<GRN />} />
               <Route path="stock" element={<Stock />} />
 
               <Route
                 path="*"
-                element={<Navigate to="/merchandise/dashboard" replace />}
+                element={<Navigate to="/fabric/dashboard" replace />}
               />
             </Routes>
           </Suspense>
@@ -571,4 +595,4 @@ const MerchandiseTeamDashboard = () => {
   );
 };
 
-export default MerchandiseTeamDashboard;
+export default FabricTeamDashboard;

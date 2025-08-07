@@ -45,6 +45,9 @@ const Partners = React.lazy(() => import("./partners/Partners"));
 const Proformainvoice = React.lazy(() =>
   import("./proformainvoice/Proformainvoice")
 );
+const CommercialInvoice = React.lazy(() =>
+  import("./commercialinvoice/CommercialInvoice")
+);
 const Indent = React.lazy(() => import("./indent/Indent"));
 
 const AdminDashboard = () => {
@@ -82,6 +85,7 @@ const AdminDashboard = () => {
     { path: "/admin/dashboard/proformainvoice", label: "Proforma Invoice" },
     { path: "/admin/dashboard/indent", label: "Indent" },
     { path: "/admin/dashboard/stock", label: "Stock" },
+    { path: "/admin/dashboard/commercialinvoice", label: "Commercial Invoice" },
     { path: "/admin/dashboard/grn", label: "Goods Received Note" },
     { path: "/admin/dashboard/work-order", label: "Work Order" },
     { path: "/admin/dashboard/material-data", label: "Material Data" },
@@ -217,7 +221,7 @@ const AdminDashboard = () => {
     {
       id: "commercialInvoice",
       label: "Commercial Invoice",
-      path: "/admin/dashboard/commercial-invoice",
+      path: "/admin/dashboard/commercialinvoice",
       icon: FileText,
     },
     {
@@ -449,9 +453,6 @@ const AdminDashboard = () => {
               <p className="text-xs text-gray-200 truncate">
                 {user?.authorizedEmail || "admin@company.com"}
               </p>
-              <span className="inline-block mt-1 px-2 py-0.5 text-xs font-medium text-emerald-700 bg-emerald-100 rounded-full">
-                Online
-              </span>
             </div>
           </div>
         </div>
@@ -664,6 +665,10 @@ const AdminDashboard = () => {
               <Route
                 path="dashboard/material-data"
                 element={<MaterialData />}
+              />
+              <Route
+                path="dashboard/commercialinvoice"
+                element={<CommercialInvoice />}
               />
               <Route
                 path="dashboard/proformainvoice"

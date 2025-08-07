@@ -11,10 +11,10 @@ const AddWorkOrder = ({ onClose }) => {
   // Company details
   const [isLoading, setIsLoading] = useState(false);
   const [companyDetails, setCompanyDetails] = useState({
-    woNo: "",
-    piNo: "",
+    wONo: "",
+    pINo: "",
     customerName: "",
-    piDate: "",
+    pIDate: "",
     indentNo: "",
     indentDate: "",
     deliveryDate: "",
@@ -22,7 +22,7 @@ const AddWorkOrder = ({ onClose }) => {
 
   const [expandableTableData, setExpandableTableData] = useState([
     {
-      id: "A",
+      id: "1",
       title: "100 % Normal Cotton canvas - 10 Oz Natural washed fabric - 10×6",
       uom: "Peices",
       quantity: "15",
@@ -56,7 +56,7 @@ const AddWorkOrder = ({ onClose }) => {
       ],
     },
     {
-      id: "B",
+      id: "2",
       title: "100 % Normal cotton canvas 8 Oz Natural washed fabric. - 16 ×8",
       uom: "Peices",
       quantity: "20",
@@ -82,7 +82,7 @@ const AddWorkOrder = ({ onClose }) => {
       ],
     },
     {
-      id: "C",
+      id: "3",
       title: "100% Normal cotton canvas 12 Oz Natural (unwashed) fabric",
       uom: "Peices",
       quantity: "15",
@@ -148,55 +148,6 @@ const AddWorkOrder = ({ onClose }) => {
     );
   };
 
-  const handleDynamicColumnChange = (parentId, subRowId, columnId, value) => {
-    setExpandableTableData((prev) =>
-      prev.map((row) =>
-        row.id === parentId
-          ? {
-              ...row,
-              subRows: row.subRows.map((subRow) =>
-                subRow.id === subRowId
-                  ? {
-                      ...subRow,
-                      dynamicValues: {
-                        ...subRow.dynamicValues,
-                        [columnId]: value,
-                      },
-                    }
-                  : subRow
-              ),
-            }
-          : row
-      )
-    );
-  };
-
-  const addDynamicColumn = (parentId) => {
-    const newColumnId = `col_${Date.now()}`;
-    const newColumnName = "Type here";
-
-    setExpandableTableData((prev) =>
-      prev.map((row) =>
-        row.id === parentId
-          ? {
-              ...row,
-              dynamicColumns: [
-                ...row.dynamicColumns,
-                { id: newColumnId, name: newColumnName },
-              ],
-              subRows: row.subRows.map((subRow) => ({
-                ...subRow,
-                dynamicValues: {
-                  ...subRow.dynamicValues,
-                  [newColumnId]: "",
-                },
-              })),
-            }
-          : row
-      )
-    );
-  };
-
   const updateDynamicColumnName = (parentId, columnId, newName) => {
     setExpandableTableData((prev) =>
       prev.map((row) =>
@@ -236,29 +187,6 @@ const AddWorkOrder = ({ onClose }) => {
     setEditedColumnName("");
   };
 
-  const removeDynamicColumn = (parentId, columnId) => {
-    setExpandableTableData((prev) =>
-      prev.map((row) =>
-        row.id === parentId
-          ? {
-              ...row,
-              dynamicColumns: row.dynamicColumns.filter(
-                (col) => col.id !== columnId
-              ),
-              subRows: row.subRows.map((subRow) => {
-                const newDynamicValues = { ...subRow.dynamicValues };
-                delete newDynamicValues[columnId];
-                return {
-                  ...subRow,
-                  dynamicValues: newDynamicValues,
-                };
-              }),
-            }
-          : row
-      )
-    );
-  };
-
   const modules = {
     toolbar: [
       [{ header: [1, 2, false] }],
@@ -287,48 +215,6 @@ const AddWorkOrder = ({ onClose }) => {
     "link",
     "image",
   ];
-
-  const addNewSubRow = (parentId) => {
-    const parentRow = expandableTableData.find((row) => row.id === parentId);
-    const newSubRowId = String(parentRow.subRows.length + 1).padStart(2, "0");
-
-    const newSubRow = {
-      id: newSubRowId,
-      materialName: "",
-      uom: "",
-      quantity: "",
-      totalMtrs: "",
-      dynamicValues: {},
-      isNewlyAdded: true,
-    };
-    parentRow.dynamicColumns.forEach((col) => {
-      newSubRow.dynamicValues[col.id] = "";
-    });
-
-    setExpandableTableData((prev) =>
-      prev.map((row) =>
-        row.id === parentId
-          ? {
-              ...row,
-              subRows: [...row.subRows, newSubRow],
-            }
-          : row
-      )
-    );
-  };
-
-  const removeSubRow = (parentId, subRowId) => {
-    setExpandableTableData((prev) =>
-      prev.map((row) =>
-        row.id === parentId
-          ? {
-              ...row,
-              subRows: row.subRows.filter((subRow) => subRow.id !== subRowId),
-            }
-          : row
-      )
-    );
-  };
 
   useEffect(() => {
     const handleEscapeKey = (event) => {
@@ -401,17 +287,28 @@ const AddWorkOrder = ({ onClose }) => {
         {/* Header */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 py-2 gap-4">
           {[
-            "woNo",
-            "piNo",
+            "wONo",
+            "pINo",
             "customerName",
-            "piDate",
+            "pIDate",
             "indentNo",
             "indentDate",
             "deliveryDate",
           ].map((field) => (
-            <div key={field} className="flex flex-col">
-              <label className="text-xs mb-1 h-6 flex items-center capitalize">
-                {field.replace(/([A-Z])/g, " $1")}
+            <div key={field} className={`flex flex-col ${
+                field === "wONo" ? "lg:col-span-2" : ""
+              }`}>
+              <label className="text-xs mb-1 h-6 flex items-center ">
+                {field
+                  .replace(/^wo/i, "WO ")
+                  .replace(/^pi/i, "PI ")
+                  .replace(/([a-z])([A-Z])/g, "$1 $2")
+                  .split(" ")
+                  .map(
+                    (word) =>
+                      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                  )
+                  .join(" ")}
               </label>
               <input
                 type="text"
@@ -419,7 +316,9 @@ const AddWorkOrder = ({ onClose }) => {
                 onChange={(e) =>
                   handleCompanyDetailChange(field, e.target.value)
                 }
-                className="border border-[#B3E2FF] rounded px-2 py-1 text-xs shadow-inner focus:outline-none focus:ring-1 focus:ring-[#2B86AA]"
+                className={`border border-[#B3E2FF] rounded px-2 py-1 text-xs shadow-inner focus:outline-none focus:ring-1 focus:ring-[#2B86AA]  ${
+                field === "wONo" ? "bg-[#FFEAB0] border border-[#E7BD00]" : ""
+              }`}
               />
             </div>
           ))}
@@ -510,10 +409,10 @@ const AddWorkOrder = ({ onClose }) => {
                         <thead>
                           <tr className="bg-[#F1FBFF] border-b border-[#2B86AA]">
                             <th className="py-1 px-4 text-sm font-medium text-[#171A1F] text-center border-r border-[#2B86AA] w-16">
-                              S no.
+                              S.No
                             </th>
                             <th className="py-1 px-4 text-sm font-medium text-[#171A1F] text-left border-r border-[#2B86AA]">
-                               Article Name
+                              Article Name
                             </th>
                             <th className="py-1 px-4 text-sm font-medium text-[#171A1F] text-center border-r border-[#2B86AA] w-24">
                               UOM

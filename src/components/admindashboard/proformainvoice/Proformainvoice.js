@@ -4,7 +4,7 @@ import AddProformaInvoice from "./AddproformaInvoice";
 import Pagination from "../../../services/config/Pagination";
 import { api } from "../../../services/config/axiosInstance";
 import { showToast } from "../../../services/config/toast";
-import Loader  from "../../../common/Loader"
+import Loader from "../../../common/Loader";
 
 const ProformaInvoice = () => {
   const [showForm, setShowForm] = useState(false);
@@ -21,8 +21,22 @@ const ProformaInvoice = () => {
   const [apiError, setApiError] = useState(null);
   const [editId, setEditId] = useState(null);
   const [openDropdown, setOpenDropdown] = useState(null);
-  const [dropdownPosition, setDropdownPosition] = useState({}); 
+  const [dropdownPosition, setDropdownPosition] = useState({});
   const dropdownRef = useRef(null);
+
+  // Get user data from localStorage or context (adjust according to your auth system)
+  const getUserDepartment = () => {
+    try {
+      const userData = JSON.parse(localStorage.getItem('user')) || {};
+      return userData.department;
+    } catch (error) {
+      console.error('Error getting user department:', error);
+      return null;
+    }
+  };
+
+  const userDepartment = getUserDepartment();
+  const ispermission = userDepartment === 'merchandise_marketing' || userDepartment === 'fabric' || userDepartment === 'trims' || userDepartment === 'production' || userDepartment === 'logistic';
 
   const fetchProformaInvoices = useCallback(async () => {
     setIsLoading(true);
@@ -136,6 +150,11 @@ const ProformaInvoice = () => {
   };
 
   const handleEdit = (id) => {
+    // Prevent edit if user is from merchandise_marketing department
+    if (ispermission) {
+      showToast.error("You don't have permission to edit proforma invoices");
+      return;
+    }
     setEditId(id);
     setShowForm(true);
   };
@@ -143,17 +162,21 @@ const ProformaInvoice = () => {
   const calculateDropdownPosition = (buttonElement, rowIndex, totalRows) => {
     const rect = buttonElement.getBoundingClientRect();
     const windowHeight = window.innerHeight;
-    const tableContainer = buttonElement.closest('.bg-white');
-    const tableRect = tableContainer ? tableContainer.getBoundingClientRect() : null;
-    
+    const tableContainer = buttonElement.closest(".bg-white");
+    const tableRect = tableContainer
+      ? tableContainer.getBoundingClientRect()
+      : null;
+
     // Fixed dropdown height based on 6 options
     const dropdownHeight = 240; // 6 items * 40px per item approximately
     const spaceBelow = windowHeight - rect.bottom;
     const spaceAbove = rect.top;
-    
+
     // Check if we're in the last few rows or don't have enough space below
     const isLastFewRows = rowIndex >= totalRows - 2;
-    const shouldOpenUp = (spaceBelow < dropdownHeight && spaceAbove > dropdownHeight) || isLastFewRows;
+    const shouldOpenUp =
+      (spaceBelow < dropdownHeight && spaceAbove > dropdownHeight) ||
+      isLastFewRows;
 
     return {
       openUp: shouldOpenUp,
@@ -168,7 +191,11 @@ const ProformaInvoice = () => {
     } else {
       const buttonElement = event.currentTarget;
       const totalRows = getPaginatedData().length;
-      const position = calculateDropdownPosition(buttonElement, rowIndex, totalRows);
+      const position = calculateDropdownPosition(
+        buttonElement,
+        rowIndex,
+        totalRows
+      );
       setDropdownPosition({ [id]: position });
       setOpenDropdown(id);
     }
@@ -241,6 +268,15 @@ const ProformaInvoice = () => {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+  };
+
+  const handleCreateProformaInvoice = () => {
+    // Prevent creation if user is from merchandise_marketing department
+    if (ispermission) {
+      showToast.error("You don't have permission to create proforma invoices");
+      return;
+    }
+    setShowForm(true);
   };
 
   const pdfOptions = [
@@ -337,6 +373,13 @@ const ProformaInvoice = () => {
           background-color: #bfdbfe;
           color: #1d4ed8;
         }
+
+        /* Disabled button styles */
+        .btn-disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+          pointer-events: none;
+        }
       `}</style>
       <Toaster />
       {showForm ? (
@@ -353,9 +396,7 @@ const ProformaInvoice = () => {
         />
       ) : (
         <>
-          {isLoading && (
-           <Loader/>
-          )}
+          {isLoading && <Loader />}
           {apiError && (
             <div className="text-red-500 text-center mb-4">
               Error: {apiError}
@@ -403,7 +444,7 @@ const ProformaInvoice = () => {
               />
               <button
                 onClick={handleExport}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 flex items-center gap-2"
+                className="px-4 py-2 bg-white text-[#2B86AA] rounded-lg border border-[#2B86AA] focus:outline-none focus:ring-2 focus:ring-offset-2 flex items-center gap-2"
               >
                 <svg
                   className="w-5 h-5"
@@ -420,25 +461,28 @@ const ProformaInvoice = () => {
                 </svg>
                 Export
               </button>
-              <button
-                onClick={() => setShowForm(true)}
-                className="px-4 py-2 bg-[#2B86AA] text-white rounded-lg hover:bg-[#43a6ce] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 flex items-center gap-2"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+              {/* Conditionally render Create Proforma Invoice button */}
+              {!ispermission && (
+                <button
+                  onClick={handleCreateProformaInvoice}
+                  className="px-4 py-2 bg-[#2B86AA] text-white rounded-lg hover:bg-[#43a6ce] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 flex items-center gap-2"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M12 4v16m8-8H4"
-                  />
-                </svg>
-                Create Proforma Invoice
-              </button>
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                  Create Proforma Invoice
+                </button>
+              )}
             </div>
           </div>
 
@@ -493,29 +537,12 @@ const ProformaInvoice = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex gap-2">
-                        <button
-                          onClick={() => handleEdit(partner._id)}
-                          className="text-gray-600 hover:text-gray-800"
-                        >
-                          <svg
-                            className="w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                            />
-                          </svg>
-                        </button>
-       <button
-                            onClick={(e) =>
-                              handlePdfDropdownToggle(partner._id, e, index)
-                            }
-                            className="text-gray-600 hover:text-gray-800 flex items-center gap-1 z-4"
+                        {/* Conditionally render Edit button */}
+                        {!ispermission && (
+                          <button
+                            onClick={() => handleEdit(partner._id)}
+                            className="text-gray-600 hover:text-gray-800"
+                            title="Edit"
                           >
                             <svg
                               className="w-5 h-5"
@@ -527,10 +554,32 @@ const ProformaInvoice = () => {
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
                                 strokeWidth="2"
-                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
                               />
                             </svg>
                           </button>
+                        )}
+                        <button
+                          onClick={(e) =>
+                            handlePdfDropdownToggle(partner._id, e, index)
+                          }
+                          className="text-gray-600 hover:text-gray-800 flex items-center gap-1 z-4"
+                          title="Generate PDF"
+                        >
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                            />
+                          </svg>
+                        </button>
                         <div className="dropdown-container" ref={dropdownRef}>
                           {openDropdown === partner._id && (
                             <div
@@ -540,7 +589,9 @@ const ProformaInvoice = () => {
                                   : "top-full mt-2 "
                               }`}
                               style={{
-                                maxHeight: dropdownPosition[partner._id]?.maxHeight || "240px",
+                                maxHeight:
+                                  dropdownPosition[partner._id]?.maxHeight ||
+                                  "240px",
                                 overflowY: "auto",
                               }}
                             >
